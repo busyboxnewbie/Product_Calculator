@@ -1,9 +1,16 @@
 {
   "version": 2,
+  "name": "product-material-cost-calculator",
   "builds": [
-    { "src": "*.html", "use": "@vercel/static" }
+    { 
+      "src": "*.html", 
+      "use": "@vercel/static" 
+    }
   ],
   "routes": [
-    { "src": "/(.*)", "dest": "/index.html" }
+    { 
+      "src": "/(.*)", 
+      "dest": "/index.html" 
+    }
   ]
 }
