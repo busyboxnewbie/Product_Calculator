@@ -5,11 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Product Material Cost Calculator</title>
     <style>
-        body {
+        * {
+            box-sizing: border-box;
             font-family: Arial, sans-serif;
+        }
+        body {
             margin: 0;
             padding: 20px;
             background-color: #f5f5f5;
+        }
+        h1, h2, h3 {
+            color: #333;
         }
         .container {
             max-width: 1200px;
@@ -17,10 +23,37 @@
             background-color: white;
             padding: 20px;
             border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
-        h1, h2, h3 {
-            color: #333;
+        .tab {
+            overflow: hidden;
+            border: 1px solid #ccc;
+            background-color: #f1f1f1;
+            border-radius: 5px 5px 0 0;
+        }
+        .tab button {
+            background-color: inherit;
+            float: left;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 12px 16px;
+            transition: 0.3s;
+            font-size: 16px;
+        }
+        .tab button:hover {
+            background-color: #ddd;
+        }
+        .tab button.active {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .tabcontent {
+            display: none;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-top: none;
+            border-radius: 0 0 5px 5px;
         }
         table {
             width: 100%;
@@ -28,33 +61,29 @@
             margin-bottom: 20px;
         }
         th, td {
-            padding: 10px;
             border: 1px solid #ddd;
+            padding: 8px;
             text-align: left;
         }
         th {
             background-color: #f2f2f2;
         }
-        .panel {
-            margin-bottom: 20px;
-            padding: 15px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-        }
-        .input-group {
-            margin-bottom: 15px;
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
         }
         input, select {
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
             width: 100%;
-            box-sizing: border-box;
+            padding: 8px;
+            margin: 5px 0;
+            display: inline-block;
+            border: 1px solid #ccc;
+            border-radius: 4px;
         }
         button {
-            padding: 10px 15px;
             background-color: #4CAF50;
             color: white;
+            padding: 10px 15px;
+            margin: 8px 0;
             border: none;
             border-radius: 4px;
             cursor: pointer;
@@ -62,63 +91,38 @@
         button:hover {
             background-color: #45a049;
         }
-        .tabs {
-            display: flex;
-            margin-bottom: 20px;
-            border-bottom: 1px solid #ddd;
-        }
-        .tab {
-            padding: 10px 20px;
-            cursor: pointer;
-            border: 1px solid transparent;
-            border-bottom: none;
-            margin-right: 5px;
-            border-radius: 5px 5px 0 0;
-        }
-        .tab.active {
-            background-color: #f8f8f8;
-            border-color: #ddd;
-            border-bottom: 1px solid #f8f8f8;
-            margin-bottom: -1px;
-        }
-        .tab-content {
-            display: none;
-            padding: 15px 0;
-        }
-        .tab-content.active {
-            display: block;
-        }
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-        }
-        .card {
-            padding: 15px;
+        .dashboard-card {
             border: 1px solid #ddd;
             border-radius: 5px;
-            background-color: white;
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: #f9f9f9;
         }
-        .profit {
-            color: green;
+        .dashboard-value {
+            font-size: 24px;
             font-weight: bold;
+            color: #333;
         }
-        .loss {
-            color: red;
-            font-weight: bold;
+        .form-group {
+            margin-bottom: 15px;
         }
-        .edit-btn {
-            background-color: #2196F3;
-            margin-right: 5px;
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
         }
-        .delete-btn {
-            background-color: #f44336;
-        }
-        .button-group {
-            margin-top: 10px;
-        }
-        .file-upload {
+        .material-selection {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 5px;
+            align-items: center;
             margin-bottom: 10px;
+        }
+        .material-selection label {
+            margin-bottom: 5px;
+        }
+        .file-input {
+            margin: 10px 0;
         }
     </style>
 </head>
@@ -126,203 +130,136 @@
     <div class="container">
         <h1>Product Material Cost Calculator</h1>
         
-        <div class="tabs">
-            <div class="tab active" data-tab="calculator">Calculator</div>
-            <div class="tab" data-tab="dashboard">Dashboard</div>
-            <div class="tab" data-tab="materials">Materials</div>
-            <div class="tab" data-tab="recipes">Product Recipes</div>
-            <div class="tab" data-tab="admin">Admin</div>
-        </div>
-        
-        <!-- Calculator Tab -->
-        <div id="calculator" class="tab-content active">
-            <div class="panel">
-                <h2>Calculate Product Cost</h2>
-                
-                <div class="input-group">
-                    <label for="productSelect">Select Product</label>
-                    <select id="productSelect"></select>
-                </div>
-                
-                <h3>Materials</h3>
-                <table id="materialsTable">
-                    <thead>
-                        <tr>
-                            <th>Material</th>
-                            <th>Quantity</th>
-                            <th>Cost per Piece</th>
-                            <th>Subtotal</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Materials will be populated here -->
-                    </tbody>
-                    <tfoot>
-                        <tr>
-                            <td colspan="3"><strong>Total Material Cost:</strong></td>
-                            <td id="totalCost">$0.00</td>
-                        </tr>
-                    </tfoot>
-                </table>
-                
-                <h3>Profit Analysis</h3>
-                <div class="input-group">
-                    <label for="sellingPrice">Selling Price ($)</label>
-                    <input type="number" id="sellingPrice" step="0.01" min="0">
-                </div>
-                
-                <div class="input-group">
-                    <label for="profit">Profit ($)</label>
-                    <input type="text" id="profit" readonly>
-                </div>
-                
-                <div class="input-group">
-                    <label for="profitMargin">Profit Margin (%)</label>
-                    <input type="text" id="profitMargin" readonly>
-                </div>
-            </div>
+        <div class="tab">
+            <button class="tablinks" onclick="openTab(event, 'Dashboard')" id="defaultOpen">Dashboard</button>
+            <button class="tablinks" onclick="openTab(event, 'Products')">Products</button>
+            <button class="tablinks" onclick="openTab(event, 'Materials')">Materials</button>
+            <button class="tablinks" onclick="openTab(event, 'Admin')">Admin</button>
         </div>
         
         <!-- Dashboard Tab -->
-        <div id="dashboard" class="tab-content">
-            <h2>Product Dashboard</h2>
-            <div class="grid" id="productGrid">
-                <!-- Products will be populated here -->
+        <div id="Dashboard" class="tabcontent">
+            <h2>Dashboard</h2>
+            <div class="grid-container">
+                <div class="dashboard-card">
+                    <h3>Total Products</h3>
+                    <div id="totalProducts" class="dashboard-value">0</div>
+                </div>
+                <div class="dashboard-card">
+                    <h3>Total Materials</h3>
+                    <div id="totalMaterials" class="dashboard-value">0</div>
+                </div>
+                <div class="dashboard-card">
+                    <h3>Average Product Cost</h3>
+                    <div id="avgProductCost" class="dashboard-value">$0.00</div>
+                </div>
+            </div>
+            
+            <h3>Product Costs Overview</h3>
+            <div id="productCostsOverview">
+                <p>No products available.</p>
+            </div>
+        </div>
+        
+        <!-- Products Tab -->
+        <div id="Products" class="tabcontent">
+            <h2>Product Recipes</h2>
+            <div id="productList">
+                <p>No products available.</p>
+            </div>
+            
+            <div class="form-group">
+                <h3>Calculate Individual Product Cost</h3>
+                <select id="productSelector">
+                    <option value="">Select a product</option>
+                </select>
+                <div id="productCostResult"></div>
+            </div>
+            
+            <div class="form-group">
+                <button onclick="exportProducts()">Export Products to CSV</button>
             </div>
         </div>
         
         <!-- Materials Tab -->
-        <div id="materials" class="tab-content">
+        <div id="Materials" class="tabcontent">
             <h2>Materials Database</h2>
-            <table id="materialsDatabase">
-                <thead>
-                    <tr>
-                        <th>Material Name</th>
-                        <th>Quantity per Pack</th>
-                        <th>Total Amount ($)</th>
-                        <th>Cost per Piece ($)</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Materials will be populated here -->
-                </tbody>
-            </table>
-        </div>
-        
-        <!-- Product Recipes Tab -->
-        <div id="recipes" class="tab-content">
-            <h2>Product Recipes</h2>
-            <table id="productRecipes">
-                <thead>
-                    <tr>
-                        <th>Product Name</th>
-                        <th>Materials</th>
-                        <th>Total Cost ($)</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Products will be populated here -->
-                </tbody>
-            </table>
+            <div id="materialsList">
+                <p>No materials available.</p>
+            </div>
+            
+            <div class="form-group">
+                <button onclick="exportMaterials()">Export Materials to CSV</button>
+            </div>
         </div>
         
         <!-- Admin Tab -->
-        <div id="admin" class="tab-content">
-            <div class="panel">
-                <h2>Add New Product</h2>
-                <div class="input-group">
-                    <label for="newProductName">Product Name</label>
-                    <input type="text" id="newProductName" placeholder="Enter product name">
-                </div>
-                
-                <h3>Materials</h3>
-                
-                <div class="input-group">
-                    <label for="newMaterial1">Material 1</label>
-                    <select id="newMaterial1"></select>
-                </div>
-                <div class="input-group">
-                    <label for="newQuantity1">Quantity 1</label>
-                    <input type="number" id="newQuantity1" min="0" step="1">
-                </div>
-                
-                <div class="input-group">
-                    <label for="newMaterial2">Material 2</label>
-                    <select id="newMaterial2"></select>
-                </div>
-                <div class="input-group">
-                    <label for="newQuantity2">Quantity 2</label>
-                    <input type="number" id="newQuantity2" min="0" step="1">
-                </div>
-                
-                <div class="input-group">
-                    <label for="newMaterial3">Material 3</label>
-                    <select id="newMaterial3"></select>
-                </div>
-                <div class="input-group">
-                    <label for="newQuantity3">Quantity 3</label>
-                    <input type="number" id="newQuantity3" min="0" step="1">
-                </div>
-                
-                <div class="input-group">
-                    <label for="newMaterial4">Material 4</label>
-                    <select id="newMaterial4"></select>
-                </div>
-                <div class="input-group">
-                    <label for="newQuantity4">Quantity 4</label>
-                    <input type="number" id="newQuantity4" min="0" step="1">
-                </div>
-                
-                <div class="input-group">
-                    <label for="newMaterial5">Material 5</label>
-                    <select id="newMaterial5"></select>
-                </div>
-                <div class="input-group">
-                    <label for="newQuantity5">Quantity 5</label>
-                    <input type="number" id="newQuantity5" min="0" step="1">
-                </div>
-                
-                <button onclick="addNewProduct()">Add Product</button>
+        <div id="Admin" class="tabcontent">
+            <h2>Administration</h2>
+            
+            <div class="form-group">
+                <h3>Add New Material</h3>
+                <input type="text" id="newMaterialName" placeholder="Material Name">
+                <input type="number" id="newQtyPerPack" placeholder="Quantity Per Pack">
+                <input type="number" id="newTotalAmount" placeholder="Total Amount">
+                <button onclick="addNewMaterial()" id="addMaterialBtn">Add Material</button>
             </div>
             
-            <div class="panel">
-                <h2>Add New Material</h2>
-                <div class="input-group">
-                    <label for="newMaterialName">Material Name</label>
-                    <input type="text" id="newMaterialName" placeholder="Enter material name">
+            <div class="form-group">
+                <h3>Add New Product</h3>
+                <input type="text" id="newProductName" placeholder="Product Name">
+                
+                <div class="material-selection">
+                    <select id="newMaterial1">
+                        <option value="NONE">Select Material 1</option>
+                    </select>
+                    <input type="number" id="newQuantity1" placeholder="Quantity">
                 </div>
-                <div class="input-group">
-                    <label for="newQtyPerPack">Quantity per Pack</label>
-                    <input type="number" id="newQtyPerPack" min="1" step="1">
+                
+                <div class="material-selection">
+                    <select id="newMaterial2">
+                        <option value="NONE">Select Material 2</option>
+                    </select>
+                    <input type="number" id="newQuantity2" placeholder="Quantity">
                 </div>
-                <div class="input-group">
-                    <label for="newTotalAmount">Total Amount ($)</label>
-                    <input type="number" id="newTotalAmount" min="0.01" step="0.01">
+                
+                <div class="material-selection">
+                    <select id="newMaterial3">
+                        <option value="NONE">Select Material 3</option>
+                    </select>
+                    <input type="number" id="newQuantity3" placeholder="Quantity">
                 </div>
-                <button onclick="addNewMaterial()">Add Material</button>
+                
+                <div class="material-selection">
+                    <select id="newMaterial4">
+                        <option value="NONE">Select Material 4</option>
+                    </select>
+                    <input type="number" id="newQuantity4" placeholder="Quantity">
+                </div>
+                
+                <div class="material-selection">
+                    <select id="newMaterial5">
+                        <option value="NONE">Select Material 5</option>
+                    </select>
+                    <input type="number" id="newQuantity5" placeholder="Quantity">
+                </div>
+                
+                <button onclick="addNewProduct()" id="addProductBtn">Add Product</button>
             </div>
             
-            <div class="panel">
-                <h2>Import/Export Data</h2>
+            <div class="form-group">
+                <h3>Import/Export Data</h3>
                 
-                <h3>Products</h3>
-                <div class="button-group">
-                    <button onclick="exportProducts()">Export Products to CSV</button>
-                </div>
-                <div class="file-upload">
+                <div class="file-input">
+                    <label for="productUpload">Import Products:</label>
                     <input type="file" id="productUpload" accept=".csv">
-                    <button onclick="uploadProductsCSV()">Upload Products CSV</button>
+                    <button onclick="uploadProductsCSV()">Upload</button>
                 </div>
                 
-                <h3>Materials</h3>
-                <div class="button-group">
-                    <button onclick="exportMaterials()">Export Materials to CSV</button>
-                </div>
-                <div class="file-upload">
+                <div class="file-input">
+                    <label for="materialUpload">Import Materials:</label>
                     <input type="file" id="materialUpload" accept=".csv">
-                    <button onclick="uploadMaterialsCSV()">Upload Materials CSV</button>
+                    <button onclick="uploadMaterialsCSV()">Upload</button>
                 </div>
             </div>
         </div>
@@ -337,514 +274,459 @@
         
         // Initialize the application
         document.addEventListener('DOMContentLoaded', function() {
-            // Set up tab navigation
-            const tabs = document.querySelectorAll('.tab');
-            tabs.forEach(tab => {
-                tab.addEventListener('click', function() {
-                    // Remove active class from all tabs and tab contents
-                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-                    
-                    // Add active class to clicked tab and corresponding content
-                    this.classList.add('active');
-                    const tabId = this.getAttribute('data-tab');
-                    document.getElementById(tabId).classList.add('active');
-                });
-            });
+            // Load data from localStorage
+            loadData();
             
-            // Initialize materials if they don't exist
-            if (!localStorage.getItem('materials')) {
-                materials = [{ name: "NONE", qtyPerPack: 0, totalAmount: 0, costPerPiece: 0 }];
-                localStorage.setItem('materials', JSON.stringify(materials));
-            } else {
-                materials = JSON.parse(localStorage.getItem('materials'));
-            }
+            // Set up event listeners
+            document.getElementById('productSelector').addEventListener('change', calculateProductCost);
             
-            // Initialize product recipes if they don't exist
-            if (!localStorage.getItem('productRecipes')) {
-                productRecipes = [];
-                localStorage.setItem('productRecipes', JSON.stringify(productRecipes));
-            } else {
-                productRecipes = JSON.parse(localStorage.getItem('productRecipes'));
-            }
-            
-            // Load UI components
-            loadMaterialsDatabase();
-            loadProductOptions();
-            loadMaterialOptions();
-            loadProductRecipes();
-            updateDashboard();
-            
-            // Add event listener for product selection
-            document.getElementById('productSelect').addEventListener('change', function() {
-                loadProductMaterials();
-            });
-            
-            // Add event listener for selling price
-            document.getElementById('sellingPrice').addEventListener('input', function() {
-                calculateProfit();
-            });
+            // Open default tab
+            document.getElementById('defaultOpen').click();
         });
         
-        // Load materials database
+        // Tab navigation function
+        function openTab(evt, tabName) {
+            var i, tabcontent, tablinks;
+            
+            tabcontent = document.getElementsByClassName('tabcontent');
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = 'none';
+            }
+            
+            tablinks = document.getElementsByClassName('tablinks');
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(' active', '');
+            }
+            
+            document.getElementById(tabName).style.display = 'block';
+            evt.currentTarget.className += ' active';
+        }
+        
+        // Load data from localStorage
+        function loadData() {
+            // Load materials
+            const storedMaterials = localStorage.getItem('materials');
+            if (storedMaterials) {
+                materials = JSON.parse(storedMaterials);
+            } else {
+                // Initialize with "NONE" placeholder
+                materials = [{ name: "NONE", qtyPerPack: 0, totalAmount: 0, costPerPiece: 0 }];
+                localStorage.setItem('materials', JSON.stringify(materials));
+            }
+            
+            // Load product recipes
+            const storedProductRecipes = localStorage.getItem('productRecipes');
+            if (storedProductRecipes) {
+                productRecipes = JSON.parse(storedProductRecipes);
+            } else {
+                productRecipes = [];
+                localStorage.setItem('productRecipes', JSON.stringify(productRecipes));
+            }
+            
+            // Update UI
+            loadMaterialsDatabase();
+            loadMaterialOptions();
+            loadProductOptions();
+            loadProductRecipes();
+            updateDashboard();
+        }
+        
+        // Load materials database table
         function loadMaterialsDatabase() {
-            const tbody = document.querySelector('#materialsDatabase tbody');
-            tbody.innerHTML = '';
+            const materialsList = document.getElementById('materialsList');
             
-            materials.forEach((material, index) => {
-                // Skip the "NONE" placeholder
-                if (material.name === "NONE") return;
+            if (materials.length <= 1) { // Only the "NONE" placeholder
+                materialsList.innerHTML = '<p>No materials available.</p>';
+                return;
+            }
+            
+            let tableHTML = `
+                <table>
+                    <tr>
+                        <th>Name</th>
+                        <th>Qty Per Pack</th>
+                        <th>Total Amount</th>
+                        <th>Cost Per Piece</th>
+                        <th>Actions</th>
+                    </tr>
+            `;
+            
+            for (let i = 0; i < materials.length; i++) {
+                const material = materials[i];
                 
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${material.name}</td>
-                    <td>${material.qtyPerPack}</td>
-                    <td>$${material.totalAmount.toFixed(2)}</td>
-                    <td>$${material.costPerPiece.toFixed(4)}</td>
-                    <td>
-                        <button class="edit-btn" onclick="editMaterial(${index})">Edit</button>
-                        <button class="delete-btn" onclick="deleteMaterial(${index})">Delete</button>
-                    </td>
+                // Skip the "NONE" placeholder
+                if (material.name === "NONE") continue;
+                
+                tableHTML += `
+                    <tr>
+                        <td>${material.name}</td>
+                        <td>${material.qtyPerPack}</td>
+                        <td>$${material.totalAmount.toFixed(2)}</td>
+                        <td>$${material.costPerPiece.toFixed(4)}</td>
+                        <td>
+                            <button onclick="editMaterial(${i})">Edit</button>
+                            <button onclick="deleteMaterial(${i})">Delete</button>
+                        </td>
+                    </tr>
                 `;
-                tbody.appendChild(row);
-            });
-        }
-        
-        // Load product options
-        function loadProductOptions() {
-            const productSelect = document.getElementById('productSelect');
-            productSelect.innerHTML = '<option value="">Select a product</option>';
+            }
             
-            productRecipes.forEach((product, index) => {
-                const option = document.createElement('option');
-                option.value = index;
-                option.textContent = product.name;
-                productSelect.appendChild(option);
-            });
+            tableHTML += '</table>';
+            materialsList.innerHTML = tableHTML;
         }
         
-        // Load material options for dropdowns
+        // Load material options for select dropdowns
         function loadMaterialOptions() {
-            const dropdowns = [
-                'newMaterial1', 'newMaterial2', 'newMaterial3', 'newMaterial4', 'newMaterial5'
+            const selects = [
+                document.getElementById('newMaterial1'),
+                document.getElementById('newMaterial2'),
+                document.getElementById('newMaterial3'),
+                document.getElementById('newMaterial4'),
+                document.getElementById('newMaterial5')
             ];
             
-            dropdowns.forEach(id => {
-                const dropdown = document.getElementById(id);
-                dropdown.innerHTML = '';
+            selects.forEach(select => {
+                if (!select) return;
                 
-                // Add "NONE" option first
-                const noneOption = document.createElement('option');
-                noneOption.value = "NONE";
-                noneOption.textContent = "NONE";
-                dropdown.appendChild(noneOption);
+                // Save current selection
+                const currentValue = select.value;
                 
-                // Add all other materials
+                // Clear options
+                select.innerHTML = '<option value="NONE">Select Material</option>';
+                
+                // Add materials
                 materials.forEach(material => {
                     if (material.name === "NONE") return;
                     
                     const option = document.createElement('option');
                     option.value = material.name;
                     option.textContent = material.name;
-                    dropdown.appendChild(option);
+                    select.appendChild(option);
                 });
+                
+                // Restore selection if possible
+                if (materials.some(m => m.name === currentValue)) {
+                    select.value = currentValue;
+                }
             });
         }
         
-        // Load materials for selected product
-        function loadProductMaterials() {
-            const productIndex = document.getElementById('productSelect').value;
+        // Load product recipes table
+        function loadProductRecipes() {
+            const productList = document.getElementById('productList');
             
-            if (productIndex === "") {
-                // Clear the table if no product is selected
-                document.querySelector('#materialsTable tbody').innerHTML = '';
-                document.getElementById('totalCost').textContent = '$0.00';
-                document.getElementById('sellingPrice').value = '';
-                document.getElementById('profit').value = '';
-                document.getElementById('profitMargin').value = '';
+            if (productRecipes.length === 0) {
+                productList.innerHTML = '<p>No products available.</p>';
                 return;
             }
             
-            const product = productRecipes[productIndex];
-            const tbody = document.querySelector('#materialsTable tbody');
-            tbody.innerHTML = '';
+            let tableHTML = `
+                <table>
+                    <tr>
+                        <th>Name</th>
+                        <th>Materials</th>
+                        <th>Total Cost</th>
+                        <th>Actions</th>
+                    </tr>
+            `;
             
-            let totalCost = 0;
-            
-            // Loop through the materials array (up to 5 materials)
-            for (let i = 0; i < product.materials.length; i++) {
-                const materialName = product.materials[i];
-                const quantity = product.quantities[i];
+            for (let i = 0; i < productRecipes.length; i++) {
+                const product = productRecipes[i];
                 
-                // Skip if material is "NONE" or quantity is empty
-                if (materialName === "NONE" || !quantity) continue;
-                
-                // Find the material in the materials array
-                const material = materials.find(m => m.name === materialName);
-                
-                if (material) {
-                    const subtotal = material.costPerPiece * quantity;
-                    totalCost += subtotal;
-                    
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${material.name}</td>
-                        <td>${quantity}</td>
-                        <td>$${material.costPerPiece.toFixed(4)}</td>
-                        <td>$${subtotal.toFixed(2)}</td>
-                    `;
-                    tbody.appendChild(row);
-                }
-            }
-            
-            document.getElementById('totalCost').textContent = `$${totalCost.toFixed(2)}`;
-            
-            // Update the product's total cost
-            product.totalCost = totalCost;
-            localStorage.setItem('productRecipes', JSON.stringify(productRecipes));
-            
-            // Clear selling price input and profit fields
-            document.getElementById('sellingPrice').value = '';
-            document.getElementById('profit').value = '';
-            document.getElementById('profitMargin').value = '';
-        }
-        
-        // Calculate profit
-        function calculateProfit() {
-            const productIndex = document.getElementById('productSelect').value;
-            
-            if (productIndex === "") return;
-            
-            const totalCost = productRecipes[productIndex].totalCost;
-            const sellingPrice = parseFloat(document.getElementById('sellingPrice').value) || 0;
-            
-            const profit = sellingPrice - totalCost;
-            const profitMargin = sellingPrice > 0 ? (profit / sellingPrice) * 100 : 0;
-            
-            document.getElementById('profit').value = `$${profit.toFixed(2)}`;
-            document.getElementById('profitMargin').value = `${profitMargin.toFixed(2)}%`;
-            
-            // Add profit/loss class
-            const profitField = document.getElementById('profit');
-            if (profit > 0) {
-                profitField.classList.add('profit');
-                profitField.classList.remove('loss');
-            } else if (profit < 0) {
-                profitField.classList.add('loss');
-                profitField.classList.remove('profit');
-            } else {
-                profitField.classList.remove('profit');
-                profitField.classList.remove('loss');
-            }
-        }
-        
-        // Load product recipes
-        function loadProductRecipes() {
-            const tbody = document.querySelector('#productRecipes tbody');
-            tbody.innerHTML = '';
-            
-            productRecipes.forEach((product, index) => {
-                const row = document.createElement('tr');
-                
-                // Create a string to display materials and quantities
                 let materialsText = '';
-                for (let i = 0; i < product.materials.length; i++) {
-                    if (product.materials[i] !== "NONE" && product.quantities[i]) {
-                        materialsText += `${product.materials[i]}: ${product.quantities[i]}<br>`;
+                for (let j = 0; j < product.materials.length; j++) {
+                    if (product.materials[j] !== 'NONE' && product.quantities[j]) {
+                        materialsText += `${product.materials[j]} (${product.quantities[j]}), `;
                     }
                 }
+                materialsText = materialsText.slice(0, -2);
                 
-                row.innerHTML = `
-                    <td>${product.name}</td>
-                    <td>${materialsText}</td>
-                    <td>$${product.totalCost.toFixed(2)}</td>
-                    <td>
-                        <button class="edit-btn" onclick="editProduct(${index})">Edit</button>
-                        <button class="delete-btn" onclick="deleteProduct(${index})">Delete</button>
-                    </td>
+                tableHTML += `
+                    <tr>
+                        <td>${product.name}</td>
+                        <td>${materialsText}</td>
+                        <td>$${product.totalCost.toFixed(2)}</td>
+                        <td>
+                            <button onclick="editProduct(${i})">Edit</button>
+                            <button onclick="deleteProduct(${i})">Delete</button>
+                        </td>
+                    </tr>
                 `;
-                tbody.appendChild(row);
+            }
+            
+            tableHTML += '</table>';
+            productList.innerHTML = tableHTML;
+        }
+        
+        // Load product options for the product selector
+        function loadProductOptions() {
+            const productSelector = document.getElementById('productSelector');
+            
+            // Save current selection
+            const currentValue = productSelector.value;
+            
+            // Clear options
+            productSelector.innerHTML = '<option value="">Select a product</option>';
+            
+            // Add products
+            productRecipes.forEach(product => {
+                const option = document.createElement('option');
+                option.value = product.name;
+                option.textContent = product.name;
+                productSelector.appendChild(option);
             });
+            
+            // Restore selection if possible
+            if (productRecipes.some(p => p.name === currentValue)) {
+                productSelector.value = currentValue;
+            }
         }
         
         // Update dashboard
         function updateDashboard() {
-            const grid = document.getElementById('productGrid');
-            grid.innerHTML = '';
+            document.getElementById('totalProducts').textContent = productRecipes.length;
+            document.getElementById('totalMaterials').textContent = materials.length - 1; // Exclude "NONE"
             
-            productRecipes.forEach((product, index) => {
-                const card = document.createElement('div');
-                card.className = 'card';
-                
-                // Create a string to display materials and quantities
-                let materialsText = '';
-                for (let i = 0; i < product.materials.length; i++) {
-                    if (product.materials[i] !== "NONE" && product.quantities[i]) {
-                        materialsText += `${product.materials[i]}: ${product.quantities[i]}<br>`;
-                    }
-                }
-                
-                card.innerHTML = `
-                    <h3>${product.name}</h3>
-                    <p><strong>Materials:</strong><br>${materialsText}</p>
-                    <p><strong>Total Cost:</strong> $${product.totalCost.toFixed(2)}</p>
+            // Calculate average product cost
+            let totalCost = 0;
+            if (productRecipes.length > 0) {
+                productRecipes.forEach(product => {
+                    totalCost += product.totalCost;
+                });
+                document.getElementById('avgProductCost').textContent = '$' + (totalCost / productRecipes.length).toFixed(2);
+            } else {
+                document.getElementById('avgProductCost').textContent = '$0.00';
+            }
+            
+            // Update product costs overview
+            const productCostsOverview = document.getElementById('productCostsOverview');
+            
+            if (productRecipes.length === 0) {
+                productCostsOverview.innerHTML = '<p>No products available.</p>';
+                return;
+            }
+            
+            let tableHTML = `
+                <table>
+                    <tr>
+                        <th>Product</th>
+                        <th>Cost</th>
+                    </tr>
+            `;
+            
+            // Sort products by cost (highest to lowest)
+            const sortedProducts = [...productRecipes].sort((a, b) => b.totalCost - a.totalCost);
+            
+            for (const product of sortedProducts) {
+                tableHTML += `
+                    <tr>
+                        <td>${product.name}</td>
+                        <td>$${product.totalCost.toFixed(2)}</td>
+                    </tr>
                 `;
-                grid.appendChild(card);
-            });
+            }
+            
+            tableHTML += '</table>';
+            productCostsOverview.innerHTML = tableHTML;
         }
         
-        // Edit material
+        // Calculate selected product cost
+        function calculateProductCost() {
+            const productName = document.getElementById('productSelector').value;
+            const resultDiv = document.getElementById('productCostResult');
+            
+            if (!productName) {
+                resultDiv.innerHTML = '';
+                return;
+            }
+            
+            const product = productRecipes.find(p => p.name === productName);
+            
+            if (!product) {
+                resultDiv.innerHTML = '<p>Product not found</p>';
+                return;
+            }
+            
+            let materialsHTML = '<h4>Materials:</h4><ul>';
+            
+            for (let i = 0; i < product.materials.length; i++) {
+                if (product.materials[i] !== 'NONE' && product.quantities[i]) {
+                    const material = materials.find(m => m.name === product.materials[i]);
+                    
+                    if (material) {
+                        const materialCost = material.costPerPiece * parseFloat(product.quantities[i]);
+                        materialsHTML += `<li>${material.name} (${product.quantities[i]}) - $${materialCost.toFixed(2)}</li>`;
+                    } else {
+                        materialsHTML += `<li>${product.materials[i]} (${product.quantities[i]}) - Material not found</li>`;
+                    }
+                }
+            }
+            
+            materialsHTML += '</ul>';
+            
+            resultDiv.innerHTML = `
+                <div class="dashboard-card">
+                    <h3>${product.name}</h3>
+                    ${materialsHTML}
+                    <h4>Total Cost: $${product.totalCost.toFixed(2)}</h4>
+                </div>
+            `;
+        }
+        
+        // Edit a product
+        function editProduct(index) {
+            const product = productRecipes[index];
+            editingProductIndex = index;
+            
+            // Populate form
+            document.getElementById('newProductName').value = product.name;
+            
+            for (let i = 0; i < 5; i++) {
+                if (i < product.materials.length) {
+                    document.getElementById(`newMaterial${i+1}`).value = product.materials[i] || 'NONE';
+                    document.getElementById(`newQuantity${i+1}`).value = product.quantities[i] || '';
+                } else {
+                    document.getElementById(`newMaterial${i+1}`).value = 'NONE';
+                    document.getElementById(`newQuantity${i+1}`).value = '';
+                }
+            }
+            
+            // Change button text
+            document.getElementById('addProductBtn').textContent = 'Update Product';
+            
+            // Switch to Admin tab
+            document.querySelector('.tablinks[onclick*="Admin"]').click();
+        }
+        
+        // Delete a product
+        function deleteProduct(index) {
+            if (confirm('Are you sure you want to delete this product?')) {
+                productRecipes.splice(index, 1);
+                
+                // Save to localStorage
+                localStorage.setItem('productRecipes', JSON.stringify(productRecipes));
+                
+                // Update UI
+                loadProductOptions();
+                loadProductRecipes();
+                updateDashboard();
+            }
+        }
+        
+        // Edit a material
         function editMaterial(index) {
             const material = materials[index];
+            editingMaterialIndex = index;
             
-            // Create edit form
-            const nameInput = prompt('Material Name:', material.name);
-            if (!nameInput) return;
+            // Gather updated information
+            const name = prompt('Material Name:', material.name);
+            if (!name) return;
             
-            const qtyPerPackInput = prompt('Quantity per Pack:', material.qtyPerPack);
-            if (!qtyPerPackInput) return;
+            const qtyPerPack = parseInt(prompt('Quantity Per Pack:', material.qtyPerPack));
+            if (isNaN(qtyPerPack) || qtyPerPack <= 0) {
+                alert('Please enter a valid quantity');
+                return;
+            }
             
-            const totalAmountInput = prompt('Total Amount ($):', material.totalAmount);
-            if (!totalAmountInput) return;
-            
-            // Update material
-            const qtyPerPack = parseInt(qtyPerPackInput) || 0;
-            const totalAmount = parseFloat(totalAmountInput) || 0;
-            
-            if (qtyPerPack <= 0 || totalAmount <= 0) {
-                alert('Please enter valid quantity and amount values');
+            const totalAmount = parseFloat(prompt('Total Amount:', material.totalAmount));
+            if (isNaN(totalAmount) || totalAmount <= 0) {
+                alert('Please enter a valid amount');
                 return;
             }
             
             // Calculate cost per piece
             const costPerPiece = totalAmount / qtyPerPack;
             
-            // Update material object
-            material.name = nameInput;
+            // Store original name for updating product recipes
+            const originalName = material.name;
+            
+            // Update material
+            material.name = name;
             material.qtyPerPack = qtyPerPack;
             material.totalAmount = totalAmount;
             material.costPerPiece = costPerPiece;
             
-            // Save to localStorage
-            localStorage.setItem('materials', JSON.stringify(materials));
-            
-            // Update UI
-            loadMaterialsDatabase();
-            loadMaterialOptions();
-            
-            // Update product costs - recalculate for all products using this material
-            updateProductCosts();
-        }
-        
-        // Delete material
-        function deleteMaterial(index) {
-            if (!confirm('Are you sure you want to delete this material?')) {
-                return;
-            }
-            
-            const materialName = materials[index].name;
-            
-            // Check if any products use this material
-            const usedInProducts = productRecipes.some(product => 
-                product.materials.includes(materialName)
-            );
-            
-            if (usedInProducts) {
-                alert('Cannot delete this material as it is used in one or more products.');
-                return;
-            }
-            
-            // Remove the material
-            materials.splice(index, 1);
-            
-            // Save to localStorage
-            localStorage.setItem('materials', JSON.stringify(materials));
-            
-            // Update UI
-            loadMaterialsDatabase();
-            loadMaterialOptions();
-        }
-        
-        // Edit product
-        function editProduct(index) {
-            const product = productRecipes[index];
-            
-            // Store the index of the product being edited
-            editingProductIndex = index;
-            
-            // Populate the form with current values
-            document.getElementById('newProductName').value = product.name;
-            
-            // Fill in material dropdowns and quantities (up to 5 materials)
-            for (let i = 0; i < 5; i++) {
-                const materialDropdown = document.getElementById(`newMaterial${i+1}`);
-                const quantityInput = document.getElementById(`newQuantity${i+1}`);
-                
-                if (i < product.materials.length) {
-                    // Set the material dropdown value
-                    const materialName = product.materials[i] || "NONE";
-                    
-                    // Find the option and set it as selected
-                    for (let j = 0; j < materialDropdown.options.length; j++) {
-                        if (materialDropdown.options[j].value === materialName) {
-                            materialDropdown.selectedIndex = j;
-                            break;
+            // Update product recipes if name changed
+            if (originalName !== name) {
+                productRecipes.forEach(product => {
+                    for (let i = 0; i < product.materials.length; i++) {
+                        if (product.materials[i] === originalName) {
+                            product.materials[i] = name;
                         }
                     }
-                    
-                    // Set the quantity value
-                    quantityInput.value = product.quantities[i] || "";
-                } else {
-                    // Clear any extra fields
-                    materialDropdown.value = "NONE";
-                    quantityInput.value = "";
-                }
+                });
             }
             
-            // Set Tab to Admin
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            document.querySelector('[data-tab="admin"]').classList.add('active');
-            document.getElementById('admin').classList.add('active');
+            // Update product costs
+            updateProductCosts();
             
-            // Change the button text
-            const addButton = document.querySelector('button[onclick="addNewProduct()"]');
-            addButton.textContent = "Update Product";
-            addButton.onclick = function() {
-                updateProduct();
-            };
+            // Save to localStorage
+            localStorage.setItem('materials', JSON.stringify(materials));
+            localStorage.setItem('productRecipes', JSON.stringify(productRecipes));
+            
+            // Update UI
+            loadMaterialsDatabase();
+            loadMaterialOptions();
+            loadProductRecipes();
+            updateDashboard();
+            
+            editingMaterialIndex = -1;
         }
         
-        // Update product
-        function updateProduct() {
-            const productName = document.getElementById('newProductName').value.trim();
+        // Delete a material
+        function deleteMaterial(index) {
+            const material = materials[index];
             
-            if (!productName) {
-                alert('Please enter a product name');
+            // Check if material is used in any product
+            const isUsed = productRecipes.some(product => 
+                product.materials.includes(material.name)
+            );
+            
+            if (isUsed) {
+                alert('This material is used in one or more products. Please update or delete those products first.');
                 return;
             }
             
-            // Get materials and quantities
-            const materials = [];
-            const quantities = [];
-            
-            for (let i = 1; i <= 5; i++) {
-                const material = document.getElementById(`newMaterial${i}`).value;
-                const quantity = document.getElementById(`newQuantity${i}`).value;
+            if (confirm('Are you sure you want to delete this material?')) {
+                materials.splice(index, 1);
                 
-                materials.push(material);
-                quantities.push(quantity);
+                // Save to localStorage
+                localStorage.setItem('materials', JSON.stringify(materials));
+                
+                // Update UI
+                loadMaterialsDatabase();
+                loadMaterialOptions();
+                updateDashboard();
             }
-            
-            // Calculate total cost
-            let totalCost = 0;
-            
-            for (let i = 0; i < materials.length; i++) {
-                if (materials[i] !== "NONE" && quantities[i]) {
-                    const material = window.materials.find(m => m.name === materials[i]);
-                    if (material) {
-                        totalCost += material.costPerPiece * parseFloat(quantities[i]);
-                    }
-                }
-            }
-            
-            // Update product
-            productRecipes[editingProductIndex] = {
-                name: productName,
-                materials: materials,
-                quantities: quantities,
-                totalCost: totalCost
-            };
-            
-            // Save to localStorage
-            localStorage.setItem('productRecipes', JSON.stringify(productRecipes));
-            
-            // Update UI
-            loadProductOptions();
-            loadProductRecipes();
-            updateDashboard();
-            
-            // Reset form
-            document.getElementById('newProductName').value = '';
-            for (let i = 1; i <= 5; i++) {
-                document.getElementById(`newMaterial${i}`).value = 'NONE';
-                document.getElementById(`newQuantity${i}`).value = '';
-            }
-            
-            // Reset button
-            const addButton = document.querySelector('button[onclick="updateProduct()"]');
-            addButton.textContent = "Add Product";
-            addButton.onclick = function() {
-                addNewProduct();
-            };
-            
-            // Reset editing index
-            editingProductIndex = -1;
-            
-            alert('Product updated successfully!');
         }
         
-        // Delete product
-        function deleteProduct(index) {
-            if (!confirm('Are you sure you want to delete this product?')) {
-                return;
-            }
-            
-            // Remove the product
-            productRecipes.splice(index, 1);
-            
-            // Save to localStorage
-            localStorage.setItem('productRecipes', JSON.stringify(productRecipes));
-            
-            // Update UI
-            loadProductOptions();
-            loadProductRecipes();
-            updateDashboard();
-        }
-        
-        // Update product costs when a material changes
+        // Update product costs after material changes
         function updateProductCosts() {
             productRecipes.forEach(product => {
                 let totalCost = 0;
                 
                 for (let i = 0; i < product.materials.length; i++) {
-                    if (product.materials[i] !== "NONE" && product.quantities[i]) {
-                        const material = materials.find(m => m.name === product.materials[i]);
+                    const materialName = product.materials[i];
+                    const quantity = product.quantities[i];
+                    
+                    if (materialName !== 'NONE' && quantity) {
+                        const material = materials.find(m => m.name === materialName);
                         if (material) {
-                            totalCost += material.costPerPiece * parseFloat(product.quantities[i]);
+                            totalCost += material.costPerPiece * parseFloat(quantity);
                         }
                     }
                 }
                 
                 product.totalCost = totalCost;
             });
-            
-            // Save to localStorage
-            localStorage.setItem('productRecipes', JSON.stringify(productRecipes));
-            
-            // Update UI
-            loadProductRecipes();
-            updateDashboard();
         }
         
         // Add new product
         function addNewProduct() {
-            // If in edit mode, call updateProduct instead
-            if (editingProductIndex !== -1) {
-                updateProduct();
-                return;
-            }
-            
             const productName = document.getElementById('newProductName').value.trim();
             
             if (!productName) {
                 alert('Please enter a product name');
-                return;
-            }
-            
-            // Check if product already exists
-            if (productRecipes.some(p => p.name === productName)) {
-                alert('A product with this name already exists');
                 return;
             }
             
@@ -860,49 +742,55 @@
             const material5 = document.getElementById('newMaterial5').value;
             const quantity5 = document.getElementById('newQuantity5').value;
             
+            // Validate at least one material
+            if ((material1 === 'NONE' || !quantity1) && 
+                (material2 === 'NONE' || !quantity2) && 
+                (material3 === 'NONE' || !quantity3) &&
+                (material4 === 'NONE' || !quantity4) &&
+                (material5 === 'NONE' || !quantity5)) {
+                alert('Please add at least one material with a quantity');
+                return;
+            }
+            
             // Calculate total cost
             let totalCost = 0;
             
-            if (material1 !== "NONE" && quantity1) {
+            if (material1 !== 'NONE' && quantity1) {
                 const material = materials.find(m => m.name === material1);
                 if (material) {
                     totalCost += material.costPerPiece * parseFloat(quantity1);
                 }
             }
             
-            if (material2 !== "NONE" && quantity2) {
+            if (material2 !== 'NONE' && quantity2) {
                 const material = materials.find(m => m.name === material2);
                 if (material) {
                     totalCost += material.costPerPiece * parseFloat(quantity2);
                 }
             }
             
-            if (material3 !== "NONE" && quantity3) {
-                const material = materials.find(m => m.name === material3);
-                if (material) {
-                    totalCost += material
-                    if (material3 !== "NONE" && quantity3) {
+            if (material3 !== 'NONE' && quantity3) {
                 const material = materials.find(m => m.name === material3);
                 if (material) {
                     totalCost += material.costPerPiece * parseFloat(quantity3);
                 }
             }
             
-            if (material4 !== "NONE" && quantity4) {
+            if (material4 !== 'NONE' && quantity4) {
                 const material = materials.find(m => m.name === material4);
                 if (material) {
                     totalCost += material.costPerPiece * parseFloat(quantity4);
                 }
             }
             
-            if (material5 !== "NONE" && quantity5) {
+            if (material5 !== 'NONE' && quantity5) {
                 const material = materials.find(m => m.name === material5);
                 if (material) {
                     totalCost += material.costPerPiece * parseFloat(quantity5);
                 }
             }
             
-            // Create new product
+            // Create new product or update existing
             const newProduct = {
                 name: productName,
                 materials: [material1, material2, material3, material4, material5],
@@ -910,7 +798,21 @@
                 totalCost: totalCost
             };
             
-            productRecipes.push(newProduct);
+            if (editingProductIndex >= 0) {
+                // Update existing product
+                productRecipes[editingProductIndex] = newProduct;
+                editingProductIndex = -1;
+                document.getElementById('addProductBtn').textContent = 'Add Product';
+            } else {
+                // Check if product already exists
+                if (productRecipes.some(p => p.name === productName)) {
+                    alert('A product with this name already exists');
+                    return;
+                }
+                
+                // Add new product
+                productRecipes.push(newProduct);
+            }
             
             // Save to localStorage
             localStorage.setItem('productRecipes', JSON.stringify(productRecipes));
@@ -933,7 +835,7 @@
             document.getElementById('newMaterial5').value = 'NONE';
             document.getElementById('newQuantity5').value = '';
             
-            alert('Product added successfully!');
+            alert(editingProductIndex >= 0 ? 'Product updated successfully!' : 'Product added successfully!');
         }
 
         // Add new material
@@ -983,210 +885,292 @@
             document.getElementById('newMaterialName').value = '';
             document.getElementById('newQtyPerPack').value = '';
             document.getElementById('newTotalAmount').value = '';
-            
             alert('Material added successfully!');
         }
-
+        
         // Export products to CSV
         function exportProducts() {
+            if (productRecipes.length === 0) {
+                alert('No products to export');
+                return;
+            }
+            
             let csvContent = 'Name,Material1,Quantity1,Material2,Quantity2,Material3,Quantity3,Material4,Quantity4,Material5,Quantity5,TotalCost\n';
             
             productRecipes.forEach(product => {
-                csvContent += `"${product.name}",`;
+                let row = [
+                    product.name,
+                    product.materials[0] || 'NONE', product.quantities[0] || '',
+                    product.materials[1] || 'NONE', product.quantities[1] || '',
+                    product.materials[2] || 'NONE', product.quantities[2] || '',
+                    product.materials[3] || 'NONE', product.quantities[3] || '',
+                    product.materials[4] || 'NONE', product.quantities[4] || '',
+                    product.totalCost.toFixed(2)
+                ];
                 
-                // Handle all 5 materials and quantities
-                for (let i = 0; i < 5; i++) {
-                    const material = product.materials[i] || '';
-                    const quantity = product.quantities[i] || '';
-                    
-                    csvContent += `"${material}",`;
-                    csvContent += `"${quantity}",`;
-                }
+                // Escape commas and quotes in fields
+                row = row.map(field => {
+                    // Convert to string if not already
+                    let str = String(field);
+                    // If the field contains commas or quotes, wrap in quotes
+                    if (str.includes(',') || str.includes('"')) {
+                        return `"${str.replace(/"/g, '""')}"`;
+                    }
+                    return str;
+                });
                 
-                csvContent += `"${product.totalCost}"\n`;
+                csvContent += row.join(',') + '\n';
             });
             
             downloadCSV(csvContent, 'product_recipes.csv');
         }
-
+        
         // Export materials to CSV
         function exportMaterials() {
+            if (materials.length <= 1) { // Only the "NONE" placeholder
+                alert('No materials to export');
+                return;
+            }
+            
             let csvContent = 'Name,QuantityPerPack,TotalAmount,CostPerPiece\n';
             
             materials.forEach(material => {
                 // Skip the "NONE" placeholder
                 if (material.name === "NONE") return;
                 
-                csvContent += `"${material.name}",`;
-                csvContent += `"${material.qtyPerPack}",`;
-                csvContent += `"${material.totalAmount}",`;
-                csvContent += `"${material.costPerPiece}"\n`;
+                let row = [
+                    material.name,
+                    material.qtyPerPack,
+                    material.totalAmount.toFixed(2),
+                    material.costPerPiece.toFixed(4)
+                ];
+                
+                // Escape commas and quotes in fields
+                row = row.map(field => {
+                    // Convert to string if not already
+                    let str = String(field);
+                    // If the field contains commas or quotes, wrap in quotes
+                    if (str.includes(',') || str.includes('"')) {
+                        return `"${str.replace(/"/g, '""')}"`;
+                    }
+                    return str;
+                });
+                
+                csvContent += row.join(',') + '\n';
             });
             
             downloadCSV(csvContent, 'materials.csv');
         }
-
+        
         // Helper function to download CSV
-        function downloadCSV(csvContent, filename) {
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        function downloadCSV(content, filename) {
+            const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
             
-            // Create download link
-            if (navigator.msSaveBlob) { // For IE
-                navigator.msSaveBlob(blob, filename);
-            } else {
-                link.href = URL.createObjectURL(blob);
-                link.setAttribute('download', filename);
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            }
+            // Create a URL for the blob
+            const url = URL.createObjectURL(blob);
+            
+            // Set up the download link
+            link.setAttribute('href', url);
+            link.setAttribute('download', filename);
+            link.style.visibility = 'hidden';
+            
+            // Add the link to the document
+            document.body.appendChild(link);
+            
+            // Click the download link
+            link.click();
+            
+            // Clean up
+            document.body.removeChild(link);
         }
-
-        // Upload products CSV
+        
+        // Upload products CSV file
         function uploadProductsCSV() {
             const fileInput = document.getElementById('productUpload');
             const file = fileInput.files[0];
             
             if (!file) {
-                alert('Please select a CSV file');
+                alert('Please select a file to upload');
                 return;
             }
             
             const reader = new FileReader();
-            reader.readAsText(file);
             
-            reader.onload = function(event) {
-                const csvData = event.target.result;
-                const lines = csvData.split('\n');
-                
-                // Skip header row
-                const newProducts = [];
-                
-                for (let i = 1; i < lines.length; i++) {
-                    if (!lines[i].trim()) continue;
+            reader.onload = function(e) {
+                try {
+                    const csvData = e.target.result;
+                    const lines = csvData.split('\n');
                     
-                    const columns = lines[i].split(',');
-                    
-                    // Clean up CSV values (remove quotes)
-                    for (let j = 0; j < columns.length; j++) {
-                        columns[j] = columns[j].replace(/^"(.*)"$/, '$1');
+                    // Skip header line
+                    if (lines.length < 2) {
+                        throw new Error('Invalid CSV format');
                     }
                     
-                    if (columns.length >= 12) { // Updated for 5 materials + quantities
-                        const name = columns[0];
-                        const material1 = columns[1] || "NONE";
-                        const quantity1 = columns[2] || "";
-                        const material2 = columns[3] || "NONE";
-                        const quantity2 = columns[4] || "";
-                        const material3 = columns[5] || "NONE";
-                        const quantity3 = columns[6] || "";
-                        const material4 = columns[7] || "NONE";
-                        const quantity4 = columns[8] || "";
-                        const material5 = columns[9] || "NONE";
-                        const quantity5 = columns[10] || "";
-                        const totalCost = parseFloat(columns[11]) || 0;
+                    // Clear existing products
+                    if (confirm('This will replace all existing products. Continue?')) {
+                        productRecipes = [];
                         
-                        newProducts.push({
-                            name: name,
-                            materials: [material1, material2, material3, material4, material5],
-                            quantities: [quantity1, quantity2, quantity3, quantity4, quantity5],
-                            totalCost: totalCost
-                        });
+                        // Parse CSV lines (starting from line 1 to skip the header)
+                        for (let i = 1; i < lines.length; i++) {
+                            if (!lines[i].trim()) continue; // Skip empty lines
+                            
+                            const values = parseCSVLine(lines[i]);
+                            
+                            if (values.length < 12) {
+                                console.warn(`Skipping line ${i}: invalid format`);
+                                continue;
+                            }
+                            
+                            const product = {
+                                name: values[0],
+                                materials: [
+                                    values[1] || 'NONE',
+                                    values[3] || 'NONE',
+                                    values[5] || 'NONE',
+                                    values[7] || 'NONE',
+                                    values[9] || 'NONE'
+                                ],
+                                quantities: [
+                                    values[2] || '',
+                                    values[4] || '',
+                                    values[6] || '',
+                                    values[8] || '',
+                                    values[10] || ''
+                                ],
+                                totalCost: parseFloat(values[11]) || 0
+                            };
+                            
+                            productRecipes.push(product);
+                        }
+                        
+                        // Save to localStorage
+                        localStorage.setItem('productRecipes', JSON.stringify(productRecipes));
+                        
+                        // Update UI
+                        loadProductOptions();
+                        loadProductRecipes();
+                        updateDashboard();
+                        
+                        alert('Products imported successfully!');
+                        fileInput.value = '';
                     }
-                }
-                
-                // Replace existing products
-                if (newProducts.length > 0) {
-                    productRecipes = newProducts;
-                    
-                    // Save to localStorage
-                    localStorage.setItem('productRecipes', JSON.stringify(productRecipes));
-                    
-                    // Update UI
-                    loadProductOptions();
-                    loadProductRecipes();
-                    updateDashboard();
-                    
-                    alert(`Successfully imported ${newProducts.length} products`);
-                } else {
-                    alert('No valid data found in the CSV file');
+                } catch (error) {
+                    alert('Error importing products: ' + error.message);
                 }
             };
             
-            reader.onerror = function() {
-                alert('Error reading the CSV file');
-            };
+            reader.readAsText(file);
         }
-
-        // Upload materials CSV
+        
+        // Upload materials CSV file
         function uploadMaterialsCSV() {
             const fileInput = document.getElementById('materialUpload');
             const file = fileInput.files[0];
             
             if (!file) {
-                alert('Please select a CSV file');
+                alert('Please select a file to upload');
                 return;
             }
             
             const reader = new FileReader();
-            reader.readAsText(file);
             
-            reader.onload = function(event) {
-                const csvData = event.target.result;
-                const lines = csvData.split('\n');
-                
-                // Skip header row
-                const newMaterials = [];
-                
-                // Keep the "NONE" placeholder
-                newMaterials.push({ name: "NONE", qtyPerPack: 0, totalAmount: 0, costPerPiece: 0 });
-                
-                for (let i = 1; i < lines.length; i++) {
-                    if (!lines[i].trim()) continue;
+            reader.onload = function(e) {
+                try {
+                    const csvData = e.target.result;
+                    const lines = csvData.split('\n');
                     
-                    const columns = lines[i].split(',');
-                    
-                    // Clean up CSV values (remove quotes)
-                    for (let j = 0; j < columns.length; j++) {
-                        columns[j] = columns[j].replace(/^"(.*)"$/, '$1');
+                    // Skip header line
+                    if (lines.length < 2) {
+                        throw new Error('Invalid CSV format');
                     }
                     
-                    if (columns.length >= 4) {
-                        const name = columns[0];
-                        const qtyPerPack = parseInt(columns[1]) || 0;
-                        const totalAmount = parseFloat(columns[2]) || 0;
-                        const costPerPiece = parseFloat(columns[3]) || 0;
+                    // Keep the "NONE" placeholder but clear other materials
+                    if (confirm('This will replace all existing materials. Continue?')) {
+                        // Keep only the "NONE" placeholder
+                        materials = materials.filter(m => m.name === "NONE");
                         
-                        newMaterials.push({
-                            name: name,
-                            qtyPerPack: qtyPerPack,
-                            totalAmount: totalAmount,
-                            costPerPiece: costPerPiece
-                        });
+                        // Parse CSV lines (starting from line 1 to skip the header)
+                        for (let i = 1; i < lines.length; i++) {
+                            if (!lines[i].trim()) continue; // Skip empty lines
+                            
+                            const values = parseCSVLine(lines[i]);
+                            
+                            if (values.length < 4) {
+                                console.warn(`Skipping line ${i}: invalid format`);
+                                continue;
+                            }
+                            
+                            const material = {
+                                name: values[0],
+                                qtyPerPack: parseInt(values[1]) || 0,
+                                totalAmount: parseFloat(values[2]) || 0,
+                                costPerPiece: parseFloat(values[3]) || 0
+                            };
+                            
+                            // Skip if name is empty or "NONE"
+                            if (!material.name || material.name === "NONE") continue;
+                            
+                            // Add the material
+                            materials.push(material);
+                        }
+                        
+                        // Save to localStorage
+                        localStorage.setItem('materials', JSON.stringify(materials));
+                        
+                        // Update UI
+                        loadMaterialsDatabase();
+                        loadMaterialOptions();
+                        updateProductCosts();
+                        
+                        // Save updated product costs
+                        localStorage.setItem('productRecipes', JSON.stringify(productRecipes));
+                        
+                        loadProductRecipes();
+                        updateDashboard();
+                        
+                        alert('Materials imported successfully!');
+                        fileInput.value = '';
                     }
-                }
-                
-                // Replace existing materials
-                if (newMaterials.length > 1) { // More than just the "NONE" placeholder
-                    materials = newMaterials;
-                    
-                    // Save to localStorage
-                    localStorage.setItem('materials', JSON.stringify(materials));
-                    
-                    // Update UI
-                    loadMaterialsDatabase();
-                    loadMaterialOptions();
-                    
-                    alert(`Successfully imported ${newMaterials.length - 1} materials`);
-                } else {
-                    alert('No valid data found in the CSV file');
+                } catch (error) {
+                    alert('Error importing materials: ' + error.message);
                 }
             };
             
-            reader.onerror = function() {
-                alert('Error reading the CSV file');
-            };
+            reader.readAsText(file);
+        }
+        
+        // Helper function to parse CSV line correctly handling quotes
+        function parseCSVLine(line) {
+            const result = [];
+            let inQuotes = false;
+            let currentValue = '';
+            
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+                
+                if (char === '"') {
+                    // Check for escaped quote (two quotes in a row)
+                    if (i + 1 < line.length && line[i + 1] === '"') {
+                        currentValue += '"';
+                        i++; // Skip the next quote
+                    } else {
+                        // Toggle quote mode
+                        inQuotes = !inQuotes;
+                    }
+                } else if (char === ',' && !inQuotes) {
+                    // End of field
+                    result.push(currentValue);
+                    currentValue = '';
+                } else {
+                    currentValue += char;
+                }
+            }
+            
+            // Add the last field
+            result.push(currentValue);
+            
+            return result;
         }
     </script>
 </body>
